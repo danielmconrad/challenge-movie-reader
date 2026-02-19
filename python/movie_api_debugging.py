@@ -5,8 +5,6 @@ import json
 import requests
 from requests import Response
 
-import sys
-
 
 class MovieReader:
     url: str = ""
@@ -32,17 +30,18 @@ class HackerRankMovieReader(MovieReader):
 
         while True:
             response: Response = requests.get(self.url.format(title=title, page=page_number))
-            titles = response.json()
+            movies = response.json()
 
-            for title in titles['data']:
+            for movie in movies['data']:
                 results.append({
-                    "title": title["Title"],
-                    "year": title["Year"],
+                    "title": movie["Title"],
+                    "year": movie["Year"],
                 })
 
-            page_number += 1
-            if page_number >= titles["total_pages"]:
+            if page_number >= movies["total_pages"]:
                 break
+
+            page_number += 1
 
         return results
 
@@ -59,13 +58,16 @@ class HackerRankMovieReader(MovieReader):
                 "Movie of the Year": [1999, 2008]
             }
         """
+        secondary_lower = secondary.lower()
         results = {}
 
-        movies = self.get_movies(secondary)
+        movies = self.get_movies(primary)
 
         for movie in movies:
-            if secondary.lower() in movie["title"].upper():
-                results[movie['title']] = [movie['year']]
+            if secondary_lower in movie["title"].lower():
+                title = movie['title']
+                year = movie['year']
+                results[title] = [*results.get(title, []), year]
 
         return results
 
@@ -81,7 +83,7 @@ def main():
             print(f"Running {data[0]}")
 
             matches = movie_reader.match_movies(data[1].split(" ")[0], data[1].split(" ")[1])
-            results = json.dumps(matches, separators=(',', ':'), ensure_ascii=False)
+            results = json.dumps(matches, separators=(',', ':'), ensure_ascii=True)
 
             if (matches == json.loads(data[2])):
                 print(f"{data[0]} Passed!\n")
