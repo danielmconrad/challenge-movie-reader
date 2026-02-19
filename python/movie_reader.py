@@ -1,16 +1,15 @@
-import requests
-from requests import Response
-
 from abc import abstractmethod
 
-from pydantic import BaseModel, Field, AliasChoices
+import requests
+from pydantic import AliasChoices, BaseModel, Field
+from requests import Response
 
 MOVIE_SEARCH_BASE_URL = "https://jsonmock.hackerrank.com/api/movies/search"
 
 
 class Movie(BaseModel):
-    title: str = Field(validation_alias=AliasChoices('title', 'Title'))
-    year: int = Field(validation_alias=AliasChoices('year', 'Year'))
+    title: str = Field(validation_alias=AliasChoices("title", "Title"))
+    year: int = Field(validation_alias=AliasChoices("year", "Year"))
 
 
 class MoviesResponsePage(BaseModel):
@@ -38,16 +37,13 @@ class HackerRankMovieReader(MovieReader):
 
     def match_movies(self, search_term: str, filter_term: str) -> dict[str, list[int]]:
         """
-        Returns a dictionary of movies along with the year(s) of release, that match both the search_term
-        and filter_term (case insensitive).  The initial query is performed on the search_term.
-        Example:
-            input: search_term = "movie", filter_term = "the"
+        Returns a dictionary of movies along with the year(s) of release, that
+        match both the search_term and filter_term (case insensitive).
+        The initial query is performed on the search_term.
 
-            returns:
-            {
-                "The Movie": [1982],
-                "Movie of the Year": [1999, 2008]
-            }
+        Example:
+            input:      search_term = "movie", filter_term = "the"
+            returns:    {"The Movie": [1982], "Movie of the Year": [1999, 2008]}
         """
         filter_term_lower = filter_term.lower()
         results = {}
@@ -60,15 +56,16 @@ class HackerRankMovieReader(MovieReader):
 
         return results
 
-
     def _get_movies(self, title: str) -> list[Movie]:
         page_number: int = 1
         results: list[Movie] = []
 
         while True:
-            url = self.url.format(base_url=MOVIE_SEARCH_BASE_URL, title=title, page=page_number)
-            response: Response = requests.get(url)
-            response_page: MoviesResponsePage = MoviesResponsePage.model_validate(response.json())
+            url = self.url.format(
+                base_url=MOVIE_SEARCH_BASE_URL, title=title, page=page_number
+            )
+            response_json: Response = requests.get(url).json()
+            response_page = MoviesResponsePage.model_validate(response_json)
 
             for movie in response_page.data:
                 results.append(movie)
