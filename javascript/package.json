@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.7.2"
+  },
+  "name": "movie_api_debugging",
+  "version": "1.0.0",
+  "main": "movie_api_debugging.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "node movie_api_debugging.js"
+  }
+}
